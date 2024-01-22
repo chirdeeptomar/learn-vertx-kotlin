@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Launcher: Port@9002" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="zulu-21" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <envs>
+      <env name="http.port" value="9002" />
+      <env name="java.net.preferIPv4Stack" value="true" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="io.vertx.core.Launcher" />
+    <module name="progress-management.main" />
+    <option name="PASS_PARENT_ENVS" value="false" />
+    <option name="PROGRAM_PARAMETERS" value="run com.traffix.progress.MainVerticle -cluster" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -3,9 +3,9 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.21"
+    kotlin("jvm") version "1.9.21"
     application
-    id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "com.traffix"
@@ -13,11 +13,12 @@ version = "1.0.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
-val vertxVersion = "4.0.3"
-val junitJupiterVersion = "5.7.0"
+val vertxVersion = "4.5.1"
+val junitJupiterVersion = "5.9.1"
+val log4jVersion = "2.22.1"
+
 
 val mainVerticleName = "com.traffix.progress.MainVerticle"
 val launcherClassName = "io.vertx.core.Launcher"
@@ -26,19 +27,23 @@ val watchForChange = "src/**/*"
 val doOnChange = "${projectDir}/gradlew classes"
 
 application {
-    mainClassName = launcherClassName
+    mainClass.set(launcherClassName)
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.+")
-
     implementation(platform("io.vertx:vertx-stack-depchain:$vertxVersion"))
+    implementation(platform("org.apache.logging.log4j:log4j-bom:$log4jVersion"))
+
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.1")
     implementation("io.vertx:vertx-web")
-    implementation("io.vertx:vertx-infinispan")
+    implementation("io.vertx:vertx-hazelcast")
     implementation("io.vertx:vertx-web-client")
     implementation("io.vertx:vertx-lang-kotlin-coroutines")
     implementation("io.vertx:vertx-lang-kotlin")
     implementation("io.vertx:vertx-pg-client")
+    implementation("com.ongres.scram:client:2.1")
+    implementation("org.apache.logging.log4j:log4j-api")
+    implementation("org.apache.logging.log4j:log4j-core")
 
     implementation(kotlin("stdlib-jdk8"))
     testImplementation("io.vertx:vertx-junit5")
@@ -46,7 +51,16 @@ dependencies {
 }
 
 val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions.jvmTarget = "14"
+compileKotlin.kotlinOptions.jvmTarget = "21"
+
+//tasks.withType<KotlinCompile>().configureEach {
+//    kotlinOptions {
+////        jvmTarget = "21"
+//        java {
+//            targetCompatibility = JavaVersion.VERSION_21
+//        }
+//    }
+//}
 
 tasks.withType<ShadowJar> {
     archiveClassifier.set("fat")
