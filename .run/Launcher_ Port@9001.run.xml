@@ -2,14 +2,12 @@
   <configuration default="false" name="Launcher: Port@9001" type="Application" factoryName="Application">
     <option name="ALTERNATIVE_JRE_PATH" value="zulu-21" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-    <envs>
-      <env name="http.port" value="9001" />
-      <env name="java.net.preferIPv4Stack" value="true" />
-    </envs>
     <option name="MAIN_CLASS_NAME" value="io.vertx.core.Launcher" />
-    <module name="progress-management.main" />
-    <option name="PASS_PARENT_ENVS" value="false" />
-    <option name="PROGRAM_PARAMETERS" value="run com.traffix.progress.MainVerticle -cluster" />
+    <module name="learn-vertx-kotlin.main" />
+    <option name="PROGRAM_PARAMETERS" value="run com.traffix.progress.MainVerticle -cluster -Dhttp.port=9001 -Djava.net.preferIPv4Stack=true" />
+    <selectedOptions>
+      <option name="environmentVariables" visible="false" />
+    </selectedOptions>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

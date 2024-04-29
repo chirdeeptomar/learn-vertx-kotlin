@@ -3,9 +3,10 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.21"
     application
+    kotlin("jvm") version "1.9.21"
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.google.osdetector") version "1.7.0"
 }
 
 group = "com.traffix"
@@ -15,9 +16,9 @@ repositories {
     mavenCentral()
 }
 
-val vertxVersion = "4.5.1"
-val junitJupiterVersion = "5.9.1"
-val log4jVersion = "2.22.1"
+val vertxVersion = "4.5.7"
+val junitJupiterVersion = "5.11.0-M1"
+val log4jVersion = "3.0.0-beta2"
 
 
 val mainVerticleName = "com.traffix.progress.MainVerticle"
@@ -31,12 +32,15 @@ application {
 }
 
 dependencies {
+    if (osdetector.arch.equals("aarch_64")) {
+        implementation("io.netty:netty-all")
+    }
     implementation(platform("io.vertx:vertx-stack-depchain:$vertxVersion"))
     implementation(platform("org.apache.logging.log4j:log4j-bom:$log4jVersion"))
 
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.0")
     implementation("io.vertx:vertx-web")
-    implementation("io.vertx:vertx-hazelcast")
+    implementation("io.vertx:vertx-infinispan")
     implementation("io.vertx:vertx-web-client")
     implementation("io.vertx:vertx-lang-kotlin-coroutines")
     implementation("io.vertx:vertx-lang-kotlin")
@@ -53,14 +57,9 @@ dependencies {
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions.jvmTarget = "21"
 
-//tasks.withType<KotlinCompile>().configureEach {
-//    kotlinOptions {
-////        jvmTarget = "21"
-//        java {
-//            targetCompatibility = JavaVersion.VERSION_21
-//        }
-//    }
-//}
+kotlin {
+    jvmToolchain(21)
+}
 
 tasks.withType<ShadowJar> {
     archiveClassifier.set("fat")

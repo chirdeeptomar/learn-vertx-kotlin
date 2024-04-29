@@ -15,10 +15,10 @@ class StockPriceFinderVerticle : CoroutineVerticle(), CoroutineEventBusSupport {
         val consumer = vertx.eventBus().consumer<String>("addr.stock.name")
 
         consumer.coHandler {
-            logger.warn("From Eventbus Consumer::StockPriceFinderVerticle :: Running inside Thread: ${Thread.currentThread().id}")
+            logger.debug("From Eventbus Consumer::StockPriceFinderVerticle :: Running inside Thread: ${Thread.currentThread().threadId()}")
 
             launch {
-                logger.debug("From Eventbus Launch::StockPriceFinderVerticle :: Running inside Thread: ${Thread.currentThread().id}")
+                logger.debug("From Eventbus Launch::StockPriceFinderVerticle :: Running inside Thread: ${Thread.currentThread().threadId()}")
 
                 val result = getStockPrice(it.body())
                 it.reply(result)
@@ -31,7 +31,7 @@ class StockPriceFinderVerticle : CoroutineVerticle(), CoroutineEventBusSupport {
 
     private suspend fun getStockPrice(stock: String): Float {
         return withContext(Dispatchers.IO) {
-            logger.info("Getting price for $stock:: Running inside Thread: ${Thread.currentThread().id}")
+            logger.debug("Getting price for $stock:: Running inside Thread: ${Thread.currentThread().threadId()}")
             return@withContext ThreadLocalRandom.current().nextFloat()
         }
     }

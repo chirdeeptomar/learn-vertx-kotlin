@@ -1,2 +1,1 @@
-rootProject.name = "progress-management"
-
+rootProject.name = "learn-vertx-kotlin"

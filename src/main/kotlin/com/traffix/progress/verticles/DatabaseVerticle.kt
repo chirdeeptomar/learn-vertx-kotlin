@@ -5,6 +5,7 @@ import com.traffix.progress.Stock
 import io.vertx.core.impl.logging.LoggerFactory
 import io.vertx.kotlin.coroutines.CoroutineEventBusSupport
 import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.coAwait
 import io.vertx.pgclient.PgBuilder
 import io.vertx.pgclient.PgConnectOptions
 import io.vertx.sqlclient.PoolOptions
@@ -38,9 +39,9 @@ class DatabaseVerticle : CoroutineVerticle(), CoroutineEventBusSupport {
         val consumer = vertx.eventBus().consumer<Stock>("addr.stock.store")
 
         consumer.coHandler {
-            logger.info("From Eventbus Consumer:: DatabaseVerticle:: Running inside Thread: ${Thread.currentThread().id}")
+            logger.debug("From Eventbus Consumer:: DatabaseVerticle:: Running inside Thread: ${Thread.currentThread().threadId()}")
 
-            logger.info("Payload Received: ${it.body()}")
+            logger.debug("Payload Received: ${it.body()}")
 
             saveToDatabase(it.body())
 
@@ -50,20 +51,14 @@ class DatabaseVerticle : CoroutineVerticle(), CoroutineEventBusSupport {
         }
     }
 
-    private fun saveToDatabase(stock: Stock) {
-        logger.info("Storing stock price in the database: $stock")
+    private suspend fun saveToDatabase(stock: Stock) {
+        logger.debug("Storing stock price in the database: $stock")
 
-        val saveResultFuture = client!!
-            .preparedQuery("INSERT INTO public.stocks(stock, price) VALUES ($1, $2)")
-            .execute(
-                Tuple.of(stock.ticker, stock.value)
-            )
-        saveResultFuture.onSuccess {
-            println("Data Stored Successfully!")
-        }
-        saveResultFuture.onFailure {
-            println("Failure: " + it.cause)
-            throw it
-        }
+        val rows = client
+            ?.preparedQuery("INSERT INTO public.stocks(stock, price) VALUES ($1, $2)")
+            ?.execute(Tuple.of(stock.ticker, stock.value))
+            ?.coAwait()
+
+        logger.info("Saved ${rows?.rowCount()} row.")
     }
 }
