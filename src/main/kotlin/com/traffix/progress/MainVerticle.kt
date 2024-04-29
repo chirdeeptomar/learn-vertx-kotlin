@@ -34,7 +34,7 @@ class MainVerticle : CoroutineVerticle(), CoroutineRouterSupport, CoroutineEvent
 
         coroutineRouter {
             router.get("/api/").coHandler { extracted(it) }
-            router.get("/api/stocks/").coHandler { getStockPrice(it) }
+            router.get("/api/stocks/:name").coHandler { getStockPrice(it) }
         }
 
         val server = vertx.createHttpServer()
@@ -54,7 +54,7 @@ class MainVerticle : CoroutineVerticle(), CoroutineRouterSupport, CoroutineEvent
     }
 
     private suspend fun getStockPrice(ctx: RoutingContext) {
-        val stock = ctx.queryParam("stock")[0]
+        val stock = ctx.pathParam("name")
         // Send a message and wait for a reply
         val reply = awaitResult<Message<Float>> {
             vertx.eventBus().request("addr.stock.name", stock, it)

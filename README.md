@@ -7,11 +7,14 @@ Create the database, using postgres for database server:
 
 Build: gradlew.bat clean build
 
-#### Run (without clustering): 
-- java -jar build\libs\progress-management-1.0.0-SNAPSHOT-fat.jar
+#### Run (without clustering):
+- java -jar build\libs\learn-vertx-kotlin-1.0.0-SNAPSHOT.jar
 
-#### Run (with clustering): 
+#### Run (with clustering):
 Using Infinispan for clustering.
 
-- java -Djava.net.preferIPv4Stack=true -Dhttp.port=9070 -jar build/libs/learn-vertx-kotlin-1.0.0-SNAPSHOT.jar -cluster
-- java -Djava.net.preferIPv4Stack=true -Dhttp.port=9080 -jar build/libs/learn-vertx-kotlin-1.0.0-SNAPSHOT.jar -cluster
+- java -Djava.net.preferIPv4Stack=true -Dhttp.port=9001 -jar build/libs/learn-vertx-kotlin-1.0.0-SNAPSHOT.jar -cluster
+- java -Djava.net.preferIPv4Stack=true -Dhttp.port=9002 -jar build/libs/learn-vertx-kotlin-1.0.0-SNAPSHOT.jar -cluster
+
+Sample request:
+http://localhost:9001/api/stocks/msft
