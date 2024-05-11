@@ -1,10 +1,10 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Launcher: Port@9001" type="Application" factoryName="Application">
+  <configuration default="false" name="Launcher: Port@9001 - Singlenode" type="Application" factoryName="Application">
     <option name="ALTERNATIVE_JRE_PATH" value="zulu-21" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="io.vertx.core.Launcher" />
     <module name="learn-vertx-kotlin.main" />
-    <option name="PROGRAM_PARAMETERS" value="run com.traffix.progress.MainVerticle -cluster -Dhttp.port=9001 -Djava.net.preferIPv4Stack=true" />
+    <option name="PROGRAM_PARAMETERS" value="run com.traffix.progress.MainVerticle" />
     <selectedOptions>
       <option name="environmentVariables" visible="false" />
     </selectedOptions>

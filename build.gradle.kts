@@ -38,7 +38,7 @@ dependencies {
     implementation(platform("io.vertx:vertx-stack-depchain:$vertxVersion"))
     implementation(platform("org.apache.logging.log4j:log4j-bom:$log4jVersion"))
 
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.1")
     implementation("io.vertx:vertx-web")
     implementation("io.vertx:vertx-infinispan")
     implementation("io.vertx:vertx-web-client")

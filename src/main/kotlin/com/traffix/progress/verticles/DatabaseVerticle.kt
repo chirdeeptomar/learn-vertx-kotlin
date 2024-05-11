@@ -1,5 +1,6 @@
 package com.traffix.progress.verticles
 
+import com.traffix.progress.EventBusAddress
 import com.traffix.progress.MainVerticle
 import com.traffix.progress.Stock
 import io.vertx.core.impl.logging.LoggerFactory
@@ -36,12 +37,12 @@ class DatabaseVerticle : CoroutineVerticle(), CoroutineEventBusSupport {
             .using(vertx)
             .build()
 
-        val consumer = vertx.eventBus().consumer<Stock>("addr.stock.store")
+        val consumer = vertx.eventBus().consumer<Stock>(EventBusAddress.STOCK_STORE)
 
         consumer.coHandler {
             logger.debug("From Eventbus Consumer:: DatabaseVerticle:: Running inside Thread: ${Thread.currentThread().threadId()}")
 
-            logger.debug("Payload Received: ${it.body()}")
+            logger.info("Payload Received: ${it.body()}")
 
             saveToDatabase(it.body())
 

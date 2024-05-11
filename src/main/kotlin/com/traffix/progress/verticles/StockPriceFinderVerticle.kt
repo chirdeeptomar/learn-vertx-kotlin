@@ -1,5 +1,6 @@
 package com.traffix.progress.verticles
 
+import com.traffix.progress.EventBusAddress
 import io.vertx.core.impl.logging.LoggerFactory
 import io.vertx.kotlin.coroutines.CoroutineEventBusSupport
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -12,7 +13,7 @@ class StockPriceFinderVerticle : CoroutineVerticle(), CoroutineEventBusSupport {
     private val logger = LoggerFactory.getLogger(StockPriceFinderVerticle::class.java)
 
     override suspend fun start() {
-        val consumer = vertx.eventBus().consumer<String>("addr.stock.name")
+        val consumer = vertx.eventBus().consumer<String>(EventBusAddress.STOCK_NAME)
 
         consumer.coHandler {
             logger.debug("From Eventbus Consumer::StockPriceFinderVerticle :: Running inside Thread: ${Thread.currentThread().threadId()}")
