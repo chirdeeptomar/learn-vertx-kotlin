@@ -22,13 +22,13 @@ object EventBusAddress {
     const val STOCK_JOURNAL = "addr.stock.journal"
 }
 
-data class Stock(val ticker: String, val value: Float): Serializable
+data class Stock(val ticker: String, val value: Float) : Serializable
 
 class MainVerticle : CoroutineVerticle(), CoroutineRouterSupport, CoroutineEventBusSupport {
 
     private val logger = LoggerFactory.getLogger(MainVerticle::class.java)
 
-    private val options: DeploymentOptions = DeploymentOptions().setThreadingModel(ThreadingModel.WORKER)
+    private val options: DeploymentOptions = DeploymentOptions()
 
     override fun start(startFuture: Promise<Void>?) {
         logger.info("Deploying Main verticle in ${if (vertx.isClustered) "Clustered" else "Non-Clustered"} mode.")
