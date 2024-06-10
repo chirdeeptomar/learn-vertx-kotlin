@@ -1,9 +1,13 @@
 package com.traffix.progress
 
+import com.traffix.progress.services.AuditService
+import com.traffix.progress.services.Auditor
 import com.traffix.progress.verticles.DatabaseVerticle
 import com.traffix.progress.verticles.JournalVerticle
 import com.traffix.progress.verticles.StockPriceFinderVerticle
-import io.vertx.core.*
+import io.vertx.core.DeploymentOptions
+import io.vertx.core.Promise
+import io.vertx.core.Vertx
 import io.vertx.core.eventbus.Message
 import io.vertx.core.impl.logging.LoggerFactory
 import io.vertx.core.json.Json
@@ -13,6 +17,7 @@ import io.vertx.ext.cluster.infinispan.InfinispanClusterManager
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.coroutines.*
+import org.jboss.weld.environment.se.Weld
 import java.io.Serializable
 
 
@@ -26,6 +31,12 @@ data class Stock(val ticker: String, val value: Float) : Serializable
 
 class MainVerticle : CoroutineVerticle(), CoroutineRouterSupport, CoroutineEventBusSupport {
 
+    // Instantiate the container
+    private val weld = Weld()
+
+    // Initialize Weld
+    private val container = weld.addBeanClass(Auditor::class.java).disableDiscovery().initialize()
+
     private val logger = LoggerFactory.getLogger(MainVerticle::class.java)
 
     private val options: DeploymentOptions = DeploymentOptions()
@@ -35,13 +46,16 @@ class MainVerticle : CoroutineVerticle(), CoroutineRouterSupport, CoroutineEvent
 
         logger.info("Registering Codecs")
         vertx.eventBus().registerDefaultCodec(
-            Stock::class.java,
-            GenericCodec(Stock::class.java)
+            Stock::class.java, GenericCodec(Stock::class.java)
         )
+
+        // Obtain the CDI-managed verticle instance
+        val auditor: AuditService = container.select(AuditService::class.java).get()
+        logger.info(auditor)
 
         vertx.deployVerticle(StockPriceFinderVerticle(), options)
         vertx.deployVerticle(DatabaseVerticle(), options)
-        vertx.deployVerticle(JournalVerticle(), options)
+        vertx.deployVerticle(JournalVerticle(auditor), options)
 
         val router: Router = Router.router(vertx)
 
@@ -85,16 +99,11 @@ class MainVerticle : CoroutineVerticle(), CoroutineRouterSupport, CoroutineEvent
 fun main() {
     val mgr: ClusterManager = InfinispanClusterManager()
 
-    Vertx
-        .builder()
-        .withClusterManager(mgr)
-        .buildClustered()
-        .onComplete { res ->
+    Vertx.builder().withClusterManager(mgr).buildClustered().onComplete { res ->
             if (res.succeeded()) {
                 val vertx: Vertx = res.result()
                 vertx.eventBus().registerDefaultCodec(
-                    Stock::class.java,
-                    GenericCodec(Stock::class.java)
+                    Stock::class.java, GenericCodec(Stock::class.java)
                 )
                 vertx.deployVerticle(MainVerticle::class.java.getName())
             } else {

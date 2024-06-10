@@ -38,7 +38,10 @@ dependencies {
     implementation(platform("io.vertx:vertx-stack-depchain:$vertxVersion"))
     implementation(platform("org.apache.logging.log4j:log4j-bom:$log4jVersion"))
 
+    implementation("io.smallrye:jandex:3.2.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.1")
+    implementation("jakarta.enterprise:jakarta.enterprise.cdi-api:4.1.0")
+    implementation("org.jboss.weld.se:weld-se-core:6.0.0.Beta1")
     implementation("io.vertx:vertx-web")
     implementation("io.vertx:vertx-infinispan")
     implementation("io.vertx:vertx-web-client")
@@ -61,7 +64,39 @@ kotlin {
     jvmToolchain(21)
 }
 
+tasks.withType<Jar> {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(sourceSets.main.get().output)
+
+    // Include resources
+    from({
+        sourceSets.main.get().resources
+    })
+}
+
+// Ensure the META-INF/beans.xml file is included in the resources
+sourceSets {
+    main {
+        resources {
+            srcDir("src/main/resources")
+        }
+    }
+}
+
+tasks.jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.processResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.withType<Copy> {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 tasks.withType<ShadowJar> {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     archiveClassifier.set("fat")
     manifest {
         attributes(mapOf("Main-Verticle" to mainVerticleName))
