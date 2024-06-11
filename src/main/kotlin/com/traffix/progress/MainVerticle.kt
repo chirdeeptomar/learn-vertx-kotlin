@@ -1,6 +1,5 @@
 package com.traffix.progress
 
-import com.traffix.progress.services.AuditService
 import com.traffix.progress.services.Auditor
 import com.traffix.progress.verticles.DatabaseVerticle
 import com.traffix.progress.verticles.JournalVerticle
@@ -32,14 +31,17 @@ data class Stock(val ticker: String, val value: Float) : Serializable
 class MainVerticle : CoroutineVerticle(), CoroutineRouterSupport, CoroutineEventBusSupport {
 
     // Instantiate the container
-    private val weld = Weld()
-
-    // Initialize Weld
-    private val container = weld.addBeanClass(Auditor::class.java).disableDiscovery().initialize()
+    private val container = Weld()
+        .addBeanClasses(Auditor::class.java)
+        .addBeanClasses(DatabaseVerticle::class.java)
+        .addBeanClasses(StockPriceFinderVerticle::class.java)
+        .addBeanClasses(JournalVerticle::class.java)
+        .disableDiscovery()
+        .initialize()
 
     private val logger = LoggerFactory.getLogger(MainVerticle::class.java)
 
-    private val options: DeploymentOptions = DeploymentOptions()
+    private val options: DeploymentOptions = DeploymentOptions().setInstances(2)
 
     override fun start(startFuture: Promise<Void>?) {
         logger.info("Deploying Main verticle in ${if (vertx.isClustered) "Clustered" else "Non-Clustered"} mode.")
@@ -49,13 +51,9 @@ class MainVerticle : CoroutineVerticle(), CoroutineRouterSupport, CoroutineEvent
             Stock::class.java, GenericCodec(Stock::class.java)
         )
 
-        // Obtain the CDI-managed verticle instance
-        val auditor: AuditService = container.select(AuditService::class.java).get()
-        logger.info(auditor)
-
-        vertx.deployVerticle(StockPriceFinderVerticle(), options)
-        vertx.deployVerticle(DatabaseVerticle(), options)
-        vertx.deployVerticle(JournalVerticle(auditor), options)
+        vertx.deployVerticle({ container.select(StockPriceFinderVerticle::class.java).get() }, options)
+        vertx.deployVerticle({ container.select(DatabaseVerticle::class.java).get() }, options)
+        vertx.deployVerticle({ container.select(JournalVerticle::class.java).get() }, options)
 
         val router: Router = Router.router(vertx)
 
@@ -100,15 +98,15 @@ fun main() {
     val mgr: ClusterManager = InfinispanClusterManager()
 
     Vertx.builder().withClusterManager(mgr).buildClustered().onComplete { res ->
-            if (res.succeeded()) {
-                val vertx: Vertx = res.result()
-                vertx.eventBus().registerDefaultCodec(
-                    Stock::class.java, GenericCodec(Stock::class.java)
-                )
-                vertx.deployVerticle(MainVerticle::class.java.getName())
-            } else {
-                // failed!
-                System.err.println("Cannot create vert.x instance : " + res.cause())
-            }
+        if (res.succeeded()) {
+            val vertx: Vertx = res.result()
+            vertx.eventBus().registerDefaultCodec(
+                Stock::class.java, GenericCodec(Stock::class.java)
+            )
+            vertx.deployVerticle(MainVerticle::class.java.getName())
+        } else {
+            // failed!
+            System.err.println("Cannot create vert.x instance : " + res.cause())
         }
+    }
 }

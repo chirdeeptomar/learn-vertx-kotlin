@@ -5,8 +5,12 @@ import com.traffix.progress.services.AuditService
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Promise
 import io.vertx.core.impl.logging.LoggerFactory
+import jakarta.inject.Inject
 
-class JournalVerticle(private val auditor: AuditService) : AbstractVerticle() {
+class JournalVerticle : AbstractVerticle() {
+
+    @Inject
+    private lateinit var auditor: AuditService
 
     private val logger = LoggerFactory.getLogger(JournalVerticle::class.java)
 
